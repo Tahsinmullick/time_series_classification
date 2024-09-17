@@ -1,0 +1,109 @@
+---
+title: 'Data wrangling - Extract , Transform and Load Data'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Imports:
+1. library(dplyr)          # data wrangling
+2. library(ggplot2)        # visualization
+3. library(tidyverse)      # tidyverse
+4. library(tibble)         # tibble
+5. library(tsibble)        # tsibble
+6. library(knitr)          # knitr to display table
+
+```{r, include=FALSE}
+library(dplyr)          # data wrangling
+library(ggplot2)        # visualization
+library(tidyverse)      # tidyverse
+library(tibble)         # tibble
+library(tsibble)        # tsibble
+library(knitr)          # knitr to display table
+
+```
+
+## 1. Reading Dataset into R:
+```{r}
+
+#set working directory to pull data
+
+setwd("C:/Users/Titan/Desktop/UVA/UVA_AA_Semesters/UVA_Spring2022/SYS5581_TimeSeries/TimeSeries_Datasets/Mullick-Tahsin/MHEALTHDATASET/")
+
+
+# Read data in as a tidy dataframe
+df <- read.table("subject10.txt", sep="")
+
+```
+## 2. Organize the into Tidy data
+```{r}
+
+# setting column names for the data file based on the datasource
+
+colnames(df) <- c('acc_chest_X','acc_chest_Y','acc_chest_Z','ecg_L1','ecg_l2','acc_leftankle_X','acc_leftankle_Y','acc_leftankle_Z','gyro_leftankle_X','gyro_leftankle_Y','gyro_leftankle_Z','mag_leftankle_X','mag_leftankle_Y','mag_leftankle_Z', 'acc_rlarm_X','acc_rlarm_Y','acc_rlarm_Z','gyro_rlarm_X','gyro_rlarm_Y','gyro_rlarm_Z','mag_rlarm_X','mag_rlarm_Y','mag_rlarm_Z','activity')
+
+```
+
+
+### Looking at the head of the dataset to ensure dataset structure as per Tidy data
+```{r}
+
+#View(head(df,n=10))
+
+knitr::kable(df[1:5,],"pipe" , caption = "Subject 10 Activity Sensor Data")
+
+```
+## 3. Clean the data and perform various data quality checks:
+
+### Inspcting  type of variables in the dataframe
+```{r}
+typeof(df)
+str(df)
+```
+### Converting the 'activity' column into type-factor:
+```{r}
+df[,'activity']<-factor(df[,'activity'])
+typeof(df$activity)
+class(df$activity)
+```
+
+
+## Checking for missing values per column:
+
+```{r}
+sapply(df, function(x) sum(is.na(x)))
+```
+
+### Adding Data Explorer library
+```{r, include = FALSE}
+library(DataExplorer)
+```
+
+
+
+
+### Missing value plot
+```{r}
+plot_missing(df)
+```
+### plot histogram of the variables
+```{r}
+plot_histogram(df)
+```
+
+## 4. Checking if data needs to be converted to tsibble
+####  The data I have is does not contain a particular timestamp but rather is a sequence of sensor readings 50Hz apart as such converting it to tsibble is not required
+
+
+
+## 5. Generating a graph of the acceleration of the chest along X axis grouped on activity
+```{r}
+ggplot(df, 
+       aes(x=acc_chest_X, group = activity, fill= activity)) +
+  geom_density(alpha=.5)
+```
+

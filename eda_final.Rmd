@@ -1,0 +1,643 @@
+---
+title: 'Assignment 3:'
+output:
+  html_document: default
+  pdf_document: default
+  extra_depenencies: ["float"]
+---
+
+
+```{r, global_options, include=FALSE}
+
+knitr::opts_chunk$set(message = FALSE, tidy.opts = list(width.cutoff=80), tidy=TRUE, fig.pos = "!H", out.extra = "")
+
+```
+
+
+
+
+
+
+#### Imports:
+1. library(dplyr)          # data wrangling
+2. library(ggplot2)        # visualization
+3. library(tidyverse)      # tidyverse
+4. library(tibble)         # tibble
+5. library(tsibble)        # tsibble
+6. library(knitr)          # knitr to display table
+7. library(DataExplorer)   # data explorer
+8. library(lubridate)      # lubridate
+9. library(GGally)         # GGally
+
+```{r, include=FALSE}
+library(dplyr)          # data wrangling
+library(ggplot2)        # visualization
+library(tidyverse)      # tidyverse
+library(tibble)         # tibble
+library(tsibble)        # tsibble
+library(knitr)          # knitr to display table
+library(DataExplorer)   # data explorer
+library(lubridate)      # lubridate
+library(GGally)         # GGally
+
+```
+
+#### Importing dataset:
+```{r}
+#set working directory to pull data
+
+setwd("C:/Users/Titan/Desktop/UVA/UVA_AA_Semesters/UVA_Spring2022/SYS5581_TimeSeries/TimeSeries_Datasets/Mullick-Tahsin/MHEALTHDATASET/")
+
+
+# Read data in as a tidy dataframe
+df <- read.table("subject10.txt", sep="")
+
+```
+
+
+Previously we converted our data into a tidy dataset and then performed some brief exploration of subject 10's data. In particular we looked at the variation of acceleration due to the chest based sensor on the z axis grouped by activity. 
+
+In this assignment we will further dive deeper into the datasets characteristics in particular will look at the data from subject 10 and investigate how the sensor behave over time.
+
+
+#### Organize into Tidy data
+```{r}
+
+# setting column names for the data file based on the datasource
+
+colnames(df) <- c('acc_chest_X','acc_chest_Y','acc_chest_Z','ecg_L1','ecg_l2','acc_leftankle_X',
+                  'acc_leftankle_Y','acc_leftankle_Z','gyro_leftankle_X','gyro_leftankle_Y',
+                  'gyro_leftankle_Z','mag_leftankle_X','mag_leftankle_Y','mag_leftankle_Z',
+                  'acc_rlarm_X','acc_rlarm_Y','acc_rlarm_Z','gyro_rlarm_X','gyro_rlarm_Y',
+                  'gyro_rlarm_Z','mag_rlarm_X','mag_rlarm_Y','mag_rlarm_Z','activity')
+
+```
+
+
+#### Looking at the head of the dataset to ensure dataset structure as per Tidy data
+```{r}
+
+#View(head(df,n=10))
+
+knitr::kable(df[1:5,1:5],"pipe" , caption = "Subject 10 Activity Sensor Data")
+
+```
+
+#### Inspcting variables and there types in the dataframe
+```{r}
+str(df)
+```
+#### Converting the 'activity' column into type-factor:
+```{r}
+df[,'activity']<-factor(df[,'activity'])
+typeof(df$activity)
+class(df$activity)
+```
+
+#### Observing activity class distribution
+
+The activity are labeled from 1 to 12 and are listed below as follows:
+
+  1. L1: Standing still (1 min) 
+  2. L2: Sitting and relaxing (1 min) 
+  3. L3: Lying down (1 min) 
+  4. L4: Walking (1 min) 
+  5. L5: Climbing stairs (1 min) 
+  6. L6: Waist bends forward (20x) 
+  7. L7: Frontal elevation of arms (20x)
+  8. L8: Knees bending (crouching) (20x)
+  9. L9: Cycling (1 min)
+  10. L10: Jogging (1 min)
+  11. L11: Running (1 min)
+  12. L12: Jump front & back (20x)
+
+```{r}
+summary(df$activity)
+```
+
+
+#### Creating datetime column following the dataset guide line for 50Hz rate of sensor readings i.e. 0.02 sec interval between sensor readings
+
+
+```{r}
+df$date_time <- Sys.time()+0.02 * (seq_len(nrow(df))-1)
+```
+
+#### Checking the dataset to ensure datetime column was added:
+```{r}
+
+#View(head(df,n=10))
+
+knitr::kable(df[1:5,22:25],"pipe" , caption = "Subject 10 Activity Sensor Data")
+
+
+```
+#### Summary of the data
+```{r}
+summary(df)
+```
+
+#### Converting dataframe to tibble object
+```{r}
+df %>% as_tibble(df)-> df_tbl 
+
+```
+
+#### New code block to convert to tsibble followed by key and index assignment
+```{r}
+typeof(df_tbl)
+class(df_tbl)
+```
+```{r}
+df_tbl %>% as_tsibble(index = date_time) -> df_tbl_ts1
+```
+
+
+
+```{r}
+#old code
+df_tbl %>% 
+  as_tsibble(key = c(acc_chest_X, acc_chest_Y, acc_chest_Z,
+                     ecg_L1,ecg_l2,acc_leftankle_X,acc_leftankle_Y,acc_leftankle_Z,
+                     gyro_leftankle_X,gyro_leftankle_Y,gyro_leftankle_Z,
+                     mag_leftankle_X,mag_leftankle_Y,mag_leftankle_Z,
+                     acc_rlarm_X,acc_rlarm_Y,acc_rlarm_Z,
+                     gyro_rlarm_X,gyro_rlarm_Y,gyro_rlarm_Z,
+                     mag_rlarm_X,mag_rlarm_Y,mag_rlarm_Z,activity) ,
+             index = date_time) -> df_tbl_ts1
+```
+
+
+l
+
+
+#### checking to see the type of df_tbl_ts to ensure it is a tsibble object
+```{r}
+typeof(df_tbl_ts1)
+class(df_tbl_ts1)
+
+```
+```{r}
+print(df_tbl_ts1[1:5, 20:25])
+```
+#### Resent order of the tsibble object
+
+Even though we have set the index as date time the previous operation of adding a column causes the sequence to be disordered as such we perform a sorting to sort our date time in increasing order
+
+```{r}
+#Ensuring that the datetime is sorted in increasing order
+
+df_tbl_ts1 %>% arrange(ymd_hms(df_tbl_ts1$date_time)) -> df_tbl_ts1_srtd
+```
+
+```{r}
+# checking the sorted tsibble
+print(df_tbl_ts1_srtd[1:10, 20:25])
+```
+
+
+
+#### Now that we have our tsibble data object we conduct a primary analysis of the frequency of each class of activity
+
+
+
+
+
+
+
+```{r}
+ggplot(df_tbl_ts1_srtd,aes(x= activity, fill = activity))+
+  geom_bar() +
+  geom_text(stat = 'count', aes(label=..count..), vjust=2)+
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  labs(title="count of different activity classes") +
+  theme(plot.title = element_text(size = 25, face = "bold"),
+        legend.title = element_text(size=20, face = "bold"),
+        legend.text = element_text(size=18),
+        axis.text.x = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.title = element_text(size = 20, face = "bold"))
+```
+We observe that there is some imbalance in the data in particular this imbalance is due to the null activity class. This will be dealt with in the modeling assignment. Where my plan is to apply re-sampling technique to undersample the majority activity class ("NULL")
+
+
+
+
+
+#### Exploring how features range in terms of their value along an axis of the respective sensors. This critical plot can help provide a visual aide in comparing features side by side with respect to quartile ranges and mean values. The evaluated features presented below include  **acc_chest_X**, **mag_leftankle_X** and **gyro_rlarm_X** 
+
+
+
+
+```{r}
+acc_box_plot <- ggplot(df_tbl_ts1_srtd,
+       aes(y=acc_chest_X, x = activity, group = activity,fill = activity )) +
+  geom_boxplot(show.legend = FALSE)
+
+#acc_box_plot + scale_fill_hue(l=20,c=20)
+acc_box_plot
+```
+
+
+
+
+```{r}
+mag_box_plot <- ggplot(df_tbl_ts1_srtd,
+       aes(y= mag_leftankle_X, x = activity, group = activity,fill = activity )) +
+  geom_boxplot(show.legend = FALSE)
+mag_box_plot
+
+```
+
+
+We observe that a difference is distinguishable in the activites that invovle movement from those that are stationary. 
+
+* The distinction is prominent in case of magnetometer and accelerometer readings
+* Therefore these sensors can definitely play an important role in time series based classification
+
+#### In order to have labels for further plotting along with the ordinal representation of the activity classes I will introduce a column of the activity definitions
+
+```{r}
+df_tbl_ts1_srtd %>%
+  mutate(activity_label = case_when(
+    activity == 0~"Null",
+    activity == 1~"Standing",
+    activity == 2~"Sitting",
+    activity == 3~"Lying down",
+    activity == 4~"Walking",
+    activity == 5~"Climbing_Stairs",
+    activity == 6~"Waist_Bends_Forward",
+    activity == 7~"Elevating_Arms",
+    activity == 8~"Crounching",
+    activity == 9~"Cycling",
+    activity == 10~"Jogging",
+    activity == 11~"Running",
+    activity == 12~"Jump"
+  )) -> df_tbl_ts1_lbld
+```
+
+
+
+
+```{r, include=FALSE}
+#Creating a column with activity class label
+
+# activity_value <- c(0,1,2,3,4,5,6,7,8,9,10,11,12)
+# activity_label <- c("Null","Standing","Sitting","Lying","Walking","Climbing_Stairs",
+#                     "Waist_Bends_Forward","Elevating_Arms","Crounching", 
+#                     "Jogging","Running","Jump")
+# 
+# df_tbl_ts1_srtd$activity_labels <-activity_label[match(df_tbl_ts1$activity, activity_value)]
+
+```
+
+
+```{r}
+print(df_tbl_ts1_lbld[1:10, 20:26])
+```
+
+
+
+
+```{r}
+# Drop null (0) class  activity rows:
+
+df_tbl_ts2 <- subset(df_tbl_ts1_lbld, activity_label != "Null")
+
+
+
+
+
+```
+
+#### plot to evaluate the classes after null class has been removed
+
+
+```{r fig.height=10, fig.width=15}
+ggplot(df_tbl_ts2,aes(x= activity_label, fill = activity_label))+
+  geom_bar() +
+  geom_text(stat = 'count', aes(label=..count..), vjust=2)+
+  scale_x_discrete(guide = guide_axis(n.dodge = 2)) +
+  labs(title="count of different activity classes") +
+  theme(plot.title = element_text(size = 25, face = "bold"),
+        legend.title = element_text(size=20, face = "bold"),
+        legend.text = element_text(size=18),
+        axis.text.x = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text(size = 15, face = "bold"),
+        axis.title = element_text(size = 20, face = "bold"))
+```
+
+We verify in this observation that the other classes are not highly imbalanced.
+
+
+
+#### We now try to visualize the data in a lower dimension with the help of T-SNE to find how much overlap there exists between classes
+
+```{r}
+library(Rtsne)
+```
+```{r}
+for (perp in c(10)) {
+  tsne <- Rtsne(df_tbl_ts2 %>% select(-c(activity, activity_label)), perplexity = perp)
+  tsne_plot <- data.frame(x = tsne$Y[,1], y = tsne$Y[,2], Activity = df_tbl_ts2$activity_label)
+  print(
+    ggplot(tsne_plot) + 
+      geom_point(aes(x = x, y = y, color = Activity))
+  )
+}
+```
+
+
+#### The plot above reveals that the data from a high dimensional perspective has activity classes that can be distinguishable. Some classes such as standing and sitting and jump and jogging are very close to each other. This does make sense as these activities often are close in terms of gyroscopic as well as acceleration based features.
+
+
+#### Next let us look at a subset of a stationary activity Vs mobility driven activity to get a sense of their sensor readings
+```{r}
+
+df_tbl_ts2 %>% filter(activity_label=="Standing")->df_tbl_standing
+print(df_tbl_standing[1:10])
+```
+```{r}
+summary(df_tbl_standing)
+```
+
+```{r}
+
+df_tbl_ts2 %>% filter(activity_label=="Walking")->df_tbl_walking
+summary(df_tbl_walking)
+```
+
+
+
+
+#### A time series visualization of selected sensors: 
+
+#### 1. magnetometer on arm
+
+```{r fig.height=8, fig.width=15}
+#ggplot(df_tbl_ts2,aes(x= activity_label, fill = activity_label))
+ggplot(data=df_tbl_ts2, aes(x=date_time,y= mag_rlarm_X, fill=activity_label))+
+  geom_line(colour="#000099")+
+  geom_rect( aes(xmin = date_time, xmax =dplyr::lead(date_time),ymin=-Inf,ymax=Inf), alpha=0.3)+
+  xlab("Time")+ ylab("Magnetometer right-lower arm X-axis")
+```
+
+
+
+
+```{r}
+ggplot(data=df_tbl_ts1_srtd, aes(x=date_time,y= mag_rlarm_X))+
+  geom_line(colour="#000099")+
+  xlab("Time")+ ylab("Magnetometer right-lower arm X-axis")
+```
+
+#### 2. acelerometer on arm
+
+
+
+```{r fig.height=8, fig.width=15}
+ggplot(data=df_tbl_ts2, aes(x=date_time,y= acc_rlarm_X, fill=activity_label))+
+  geom_line(colour="#000099")+
+  geom_rect( aes(xmin = date_time, xmax =dplyr::lead(date_time),ymin=-Inf,ymax=Inf), alpha=0.3)+
+  xlab("Time")+ ylab("accelerometer right-lower arm X-axis")
+```
+
+
+
+
+```{r}
+ggplot(data=df_tbl_ts1_srtd, aes(x=date_time,y= acc_rlarm_X))+
+  geom_line(colour="#000099")+
+  xlab("Time")+ ylab("accelerometer right-lower arm X-axis")
+```
+
+
+#### 3. ECG lead 2
+
+```{r fig.height=8, fig.width=15}
+ggplot(data=df_tbl_ts2, aes(x=date_time,y= ecg_l2, fill=activity_label))+
+  geom_line(colour="#000099")+
+  geom_rect( aes(xmin = date_time, xmax =dplyr::lead(date_time),ymin=-Inf,ymax=Inf), alpha=0.4)+
+  xlab("Time")+ ylab("ECG L2")
+```
+
+
+
+
+
+```{r}
+ggplot(data=df_tbl_ts1_srtd, aes(x=date_time,y= ecg_l2))+
+  geom_line(colour="#000099")+
+  xlab("Time")+ ylab("ECG L2")
+```
+
+
+
+
+#### 4. gyroscope on left ankle
+
+
+```{r fig.height=8, fig.width=15}
+ggplot(data=df_tbl_ts2, aes(x=date_time,y= gyro_leftankle_X, fill=activity_label))+
+  geom_line(colour="#000099")+
+  geom_rect( aes(xmin = date_time, xmax =dplyr::lead(date_time),ymin=-Inf,ymax=Inf), alpha=0.3)+
+  xlab("Time")+ ylab("gyro_left_ankle")
+```
+
+
+
+
+
+
+
+
+```{r}
+ggplot(data=df_tbl_ts1_srtd, aes(x=date_time,y= gyro_leftankle_X))+
+  geom_line(colour="#000099")+
+  xlab("Time")+ ylab("gyro_left_ankle")
+```
+
+
+#### Analyzing pair plots of acceleration of chest sensors in all axis
+
+
+```{r}
+df_tbl_ts1_lbld %>% ggpairs(columns = 1:3, aes(colour="#000099" ,alpha =0.5))
+
+```
+
+
+#### Analyzing pair plots of gyroscope of left ankle in all axis
+
+
+
+```{r}
+df_tbl_ts1_lbld %>% ggpairs(columns = 9:11, aes(colour="#D55E00" ,alpha =0.5))
+```
+
+
+#### Analyzing pair plots of magnetometer of left ankle in all axis
+
+
+
+```{r}
+df_tbl_ts1_lbld %>% ggpairs(columns = 12:14, aes(colour="#000099" ,alpha =0.5))
+```
+
+#### Analyzing pair plots of ECG in all axis
+
+
+
+```{r}
+df_tbl_ts1_lbld %>% ggpairs(columns = 4:5, aes(colour="#000099" ,alpha =0.5))
+```
+
+
+
+
+The ecg sensors show a direct correlation between them as they are both recording heart beats it makes sense for them to be correlated.
+
+The purpose of  the pair plots was to observe how each sensor group is related, we can conclude that axial sensor readings pertaining to acceleormeter-3 axis, gyroscope-3 axis and magnetometer-3 axis do not hold strong correlations.
+
+#### Pair plot between accelerometers on chest, ankle and arm along the x-axis:
+
+
+```{r}
+df_tbl_ts1_lbld %>% ggpairs(columns = c(1,6,15), aes(colour="#000099" ,alpha =0.5))
+```
+
+
+This combination has not yielded any significant correaltions
+
+#### Pair plot between accelerometers on chest, ankle and arm along the x-axis:
+
+
+
+```{r}
+df_tbl_ts1_lbld %>% ggpairs(columns = c(6,10,12), aes(colour="#000099" ,alpha =0.5))
+```
+
+
+#### Principal component analysis:
+
+
+
+```{r}
+library(plotly)
+library(ggfortify) 
+```
+
+
+
+
+
+
+```{r}
+
+#dropping activity, date_time, activity_label
+
+df_tbl_ts1_drpdcol <- df_tbl_ts1_lbld[,-c(4,24,25,26)]
+
+pca <- prcomp(df_tbl_ts1_drpdcol, scale=TRUE)
+
+```
+
+
+
+
+
+
+```{r}
+pca_plot <- autoplot(pca, data=df_tbl_ts1_lbld, colour='activity_label')
+
+pca_plot
+```
+
+
+
+#### Biplot from the PCA
+
+
+```{r}
+pca_plot_loadings <- autoplot(pca, data=df_tbl_ts1_lbld, colour='activity_label', 
+                              loadings=TRUE, loadings.label = TRUE,
+                              loadings.label.size=3)
+pca_plot_loadings
+```
+
+Both the scatter plot and the biplots reveal the clustering of activity based on the principal components 1 and 2. The inference from these two plots supports our understanding based on the T-SNE plot i.e. the activities have very non-linear boundaries and we understand that due to their heavy overlap.
+
+
+
+
+```{r}
+summary(pca)
+```
+
+
+
+
+####  Scree plot represented with percent variation
+
+
+```{r fig.height=8, fig.width=15}
+barplot(pca.var.per, xlab='Principle Components', ylab='Percent Variance', names.arg=1:length(pca.var.per), 
+        las=1, ylim=c(0, max(pca.var.per)), col='lightblue')
+
+abline(h=1/ncol(df_tbl_ts1_drpdcol)*100, col='red')
+```
+
+
+
+
+
+
+
+
+
+
+
+#### The overall exploratory data analysis provides insightful information on the nature of the time series. Some important conclusions we can summarize include:
+
+* The series of sensor readings have the potential to be modeled as a  Time series based classification problem.
+
+* The T-SNE and PCA reveal that the problem is non-linear in nature
+
+* The frequency plots show that setting aside null activity class all other activity classes
+  are balanced
+  
+* The time series plot and box plots of the sensors showcase how the sensor behave over time and their association with types of activity performed
+
+* Finally we observe through pair-plots that only ecg sensors exhibit direct correlation,while the rest of the sensors do not have significant correlations.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
