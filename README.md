@@ -1,38 +1,72 @@
-## TIME SERIES CLASSIFICATION OF MOBILE HEALTH (MHEALTH) DATASET FOR HUMAN BEHAVIOR ANALYSIS
-- The MHEALTH dataset comprises body motion and vital signs recordings for ten volunteers of diverse profile while performing several physical activities. Sensors placed on the subject's chest, right wrist and left ankle are used to measure the motion experienced by diverse body parts, namely, acceleration, rate of turn and magnetic field orientation. The sensor positioned on the chest also provides 2-lead ECG measurements, which can be potentially used for basic heart monitoring, checking for various arrhythmias or looking at the effects of exercise on the ECG.
+# 🩺 TIME SERIES CLASSIFICATION OF MOBILE HEALTH (MHEALTH) DATASET 🔬  
 
-----------------------------------------------------------------------------------------------------------------------
-DATASET SUMMARY:
-#Activities: 12 
-#Sensor devices: 3
-#Subjects: 10
-----------------------------------------------------------------------------------------------------------------------
-## EXPERIMENTAL SETUP
-- The collected dataset comprises body motion and vital signs recordings for ten volunteers of diverse profile while performing 12 physical activities (Table 1). Shimmer2 [BUR10] wearable sensors were used for the recordings. The sensors were respectively placed on the subject's chest, right wrist and left ankle and attached by using elastic straps (as shown in the figure in attachment). The use of multiple sensors permits us to measure the motion experienced by diverse body parts, namely, the acceleration, the rate of turn and the magnetic field orientation, thus better capturing the body dynamics. The sensor positioned on the chest also provides 2-lead ECG measurements which are not used for the development of the recognition model but rather collected for future work purposes. This information can be used, for example, for basic heart monitoring, checking for various arrhythmias or looking at the effects of exercise on the ECG. All sensing modalities are recorded at a sampling rate of 50 Hz, which is considered sufficient for capturing human activity. Each session was recorded using a video camera. This dataset is found to generalize to common activities of the daily living, given the diversity of body parts involved in each one (e.g., frontal elevation of arms vs. knees bending), the intensity of the actions (e.g., cycling vs. sitting and relaxing) and their execution speed or dynamicity (e.g., running vs. standing still). The activities were collected in an out-of-lab environment with no constraints on the way these must be executed, with the exception that the subject should try their best when executing them.
+## 🔍 Overview  
+The **MHEALTH dataset** comprises body motion and vital sign recordings from **10 diverse volunteers** performing various physical activities. 📌 Using sensors placed on the **chest**, **right wrist**, and **left ankle**, we capture:  
+- 🔹 **Acceleration**  
+- 🔹 **Rate of turn**  
+- 🔹 **Magnetic field orientation**  
+- 🔹 **ECG measurements** (for potential heart monitoring 💙)  
 
-## ACTIVITY SET
-The activity set is listed in the following:
-- L1: Standing still (1 min) 
-- L2: Sitting and relaxing (1 min) 
-- L3: Lying down (1 min) 
-- L4: Walking (1 min) 
-- L5: Climbing stairs (1 min) 
-- L6: Waist bends forward (20x) 
-- L7: Frontal elevation of arms (20x)
-- L8: Knees bending (crouching) (20x)
-- L9: Cycling (1 min)
-- L10: Jogging (1 min)
-- L11: Running (1 min)
-- L12: Jump front & back (20x)
-- NOTE: In brackets are the number of repetitions (Nx) or the duration of the exercises (min).
-[The Link to the MHEALTH dataset] (https://archive.ics.uci.edu/dataset/319/mhealth+dataset)
+This dataset is crucial for analyzing human activity and health monitoring. ⚡  
 
-## The steps to model the data are as follows
-- Exploratory data analysis
-- Data Preprocessing
-- Feature Selection
-- Train-Test Split
-- Model Selection
-- Model Training
-- Activity Classification
-- Model Performance Inference
+---
+
+## 📊 Dataset Summary  
+| Feature       | Count  |  
+|--------------|-------|  
+| **Activities** | 12    |  
+| **Sensor devices** | 3 |  
+| **Subjects** | 10    |  
+
+📡 **Shimmer2 wearable sensors** were utilized for high-precision recordings at a **50 Hz sampling rate**, ensuring accurate detection of human activities.  
+
+---
+
+## 🧪 Experimental Setup  
+🔬 The dataset captures **12 different activities** in an **unrestricted, real-world environment** using multiple sensors to measure body dynamics. Key features:  
+- 📌 **Elastic straps** secure the sensors to subjects.  
+- 🎥 Each session is recorded via **video camera**.  
+- ⚡ The chest sensor additionally collects **2-lead ECG signals** (for future applications).  
+- 📡 Collected data generalizes well to daily activities of varying intensity and movement dynamics.  
+
+---
+
+## 🏃 Activity Set  
+
+| Activity Code | Description | Duration / Repetitions |  
+|--------------|-------------|----------------|  
+| **L1**  | 🛑 Standing still | 1 min |  
+| **L2**  | 🪑 Sitting & relaxing | 1 min |  
+| **L3**  | 😴 Lying down | 1 min |  
+| **L4**  | 🚶 Walking | 1 min |  
+| **L5**  | ⛰️ Climbing stairs | 1 min |  
+| **L6**  | 🔄 Waist bends forward | 20x |  
+| **L7**  | ✋ Frontal elevation of arms | 20x |  
+| **L8**  | 🏋️ Knees bending (crouching) | 20x |  
+| **L9**  | 🚲 Cycling | 1 min |  
+| **L10** | 🏃 Jogging | 1 min |  
+| **L11** | 🏃‍♂️ Running | 1 min |  
+| **L12** | 🔄 Jump front & back | 20x |  
+
+🔗 **Dataset Access:** [MHEALTH Dataset](https://archive.ics.uci.edu/dataset/319/mhealth+dataset)  
+
+---
+
+## 🛠️ Steps for Modeling the Data  
+1️⃣ **Exploratory Data Analysis** 🔍  
+2️⃣ **Data Preprocessing** 🏗️  
+3️⃣ **Feature Selection** 🎯  
+4️⃣ **Train-Test Split** 📊  
+5️⃣ **Model Selection** 🧠  
+6️⃣ **Model Training** 🔥  
+7️⃣ **Activity Classification** 🚀  
+8️⃣ **Model Performance Inference** 🎯  
+
+---
+
+## 🔗 References & Resources  
+📚 **Learn More:**  
+- [UCI MHEALTH Dataset](https://archive.ics.uci.edu/dataset/319/mhealth+dataset)  
+- [Wearable Sensor Data in Machine Learning](https://deepai.org/publication/mhealth-dataset-analysis)  
+
+---
